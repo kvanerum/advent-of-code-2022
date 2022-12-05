@@ -22,7 +22,6 @@ fn main() {
         let crate_from = &mut crates_part_2[(m.from - 1) as usize];
         let new_size = crate_from.len() - m.amount as usize;
         let pick_up: Vec<char> = crate_from.drain(new_size..).collect();
-        crate_from.truncate(new_size);
         crates_part_2[(m.to - 1) as usize].extend(pick_up);
     }
 
