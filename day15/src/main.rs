@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use regex::Regex;
 use std::cmp::{max, min};
 
@@ -7,7 +8,7 @@ fn main() {
     let impossible_regions = get_impossible_regions_for_row(2000000, &input);
     println!("{}", count_total_positions(&impossible_regions));
 
-    for row in 0..4000001 {
+    (0..4000001).into_par_iter().for_each(|row| {
         let mut impossible_regions = get_impossible_regions_for_row(row, &input);
         clamp_regions(&mut impossible_regions);
 
@@ -19,7 +20,7 @@ fn main() {
                 println!("{}", beacon.0 as u64 * 4000000 + beacon.1 as u64);
             }
         }
-    }
+    });
 }
 
 fn clamp_regions(regions: &mut Vec<(i32, i32)>) {
