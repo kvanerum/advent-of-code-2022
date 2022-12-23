@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 struct Instruction {
     walk: Option<u8>,
@@ -13,12 +15,132 @@ struct Instruction {
 fn main() {
     let (map, instructions) = read_input();
 
+    let _cube_sides_example = [
+        (8, 11, 0, 3),
+        (0, 3, 4, 7),
+        (4, 7, 4, 7),
+        (8, 11, 4, 7),
+        (8, 11, 8, 11),
+        (12, 15, 8, 11),
+    ];
+
+    let cube_sides_input = [
+        (50, 99, 0, 49),
+        (100, 149, 0, 49),
+        (50, 99, 50, 99),
+        (0, 49, 100, 149),
+        (50, 99, 100, 149),
+        (0, 49, 150, 199),
+    ];
+
+    let _cube_transitions_example_2d: HashMap<(usize, u8), (usize, u8, u8, bool)> =
+        HashMap::from([
+            ((0, 1), (3, 1, 3, false)),
+            ((1, 0), (2, 0, 2, false)),
+            ((1, 1), (1, 1, 3, false)),
+            ((2, 0), (3, 0, 2, false)),
+            ((2, 1), (2, 1, 3, false)),
+            ((3, 0), (1, 0, 2, false)),
+        ]);
+
+    let _cube_transitions_example_3d: HashMap<(usize, u8), (usize, u8, u8, bool)> =
+        HashMap::from([
+            ((0, 1), (3, 1, 3, false)),
+            ((1, 0), (2, 0, 2, false)),
+            ((2, 3), (0, 0, 2, false)),
+            ((3, 0), (5, 1, 3, true)),
+            ((4, 1), (1, 3, 1, true)),
+            ((5, 2), (4, 2, 0, false)),
+        ]);
+
+    let cube_transitions_input_2d: HashMap<(usize, u8), (usize, u8, u8, bool)> = HashMap::from([
+        ((0, 0), (1, 0, 2, false)),
+        ((0, 1), (2, 1, 3, false)),
+        ((0, 2), (1, 2, 0, false)),
+        ((0, 3), (4, 3, 1, false)),
+        ((1, 0), (0, 0, 2, false)),
+        ((1, 1), (1, 1, 3, false)),
+        ((1, 2), (0, 2, 0, false)),
+        ((1, 3), (1, 3, 1, false)),
+        ((2, 0), (2, 0, 2, false)),
+        ((2, 1), (4, 1, 3, false)),
+        ((2, 2), (2, 2, 0, false)),
+        ((2, 3), (0, 3, 1, false)),
+        ((3, 0), (4, 0, 2, false)),
+        ((3, 1), (5, 1, 3, false)),
+        ((3, 2), (4, 2, 0, false)),
+        ((3, 3), (5, 3, 1, false)),
+        ((4, 0), (3, 0, 2, false)),
+        ((4, 1), (0, 1, 3, false)),
+        ((4, 2), (3, 2, 0, false)),
+        ((4, 3), (2, 3, 1, false)),
+        ((5, 0), (5, 0, 2, false)),
+        ((5, 1), (3, 1, 3, false)),
+        ((5, 2), (5, 2, 0, false)),
+        ((5, 3), (3, 3, 1, false)),
+    ]);
+
+    let cube_transitions_input_3d: HashMap<(usize, u8), (usize, u8, u8, bool)> = HashMap::from([
+        ((0, 0), (1, 0, 2, false)), // ok2
+        ((0, 1), (2, 1, 3, false)), // ok2
+        ((0, 2), (3, 0, 2, true)),  // ok2
+        ((0, 3), (5, 0, 2, false)), // ok2
+        ((1, 0), (4, 2, 0, true)),  // ok i guess
+        ((1, 1), (2, 2, 0, false)), // ok2
+        ((1, 2), (0, 2, 0, false)), // ok
+        ((1, 3), (5, 3, 1, false)), // ok
+        ((2, 0), (1, 3, 1, false)), // ok
+        ((2, 1), (4, 1, 3, false)), // ok
+        ((2, 2), (3, 1, 3, false)), // ok
+        ((2, 3), (0, 3, 1, false)), // ok
+        ((3, 0), (4, 0, 2, false)), // ok
+        ((3, 1), (5, 1, 3, false)), // ok
+        ((3, 2), (0, 0, 2, true)),  // ok
+        ((3, 3), (2, 0, 2, false)), // ok
+        ((4, 0), (1, 2, 0, true)),  // ok
+        ((4, 1), (5, 2, 0, false)), // ok
+        ((4, 2), (3, 2, 0, false)), // ok
+        ((4, 3), (2, 3, 1, false)), // ok
+        ((5, 0), (4, 3, 1, false)), // ok
+        ((5, 1), (1, 1, 3, false)), // ok
+        ((5, 2), (0, 1, 3, false)), // ok
+        ((5, 3), (3, 3, 1, false)), // ok
+    ]);
+
+    run(
+        &map,
+        &instructions,
+        &cube_sides_input,
+        &cube_transitions_input_2d,
+    );
+
+    run(
+        &map,
+        &instructions,
+        &cube_sides_input,
+        &cube_transitions_input_3d,
+    );
+}
+
+fn run(
+    map: &Vec<Vec<char>>,
+    instructions: &Vec<Instruction>,
+    cube_sides: &[(usize, usize, usize, usize)],
+    cube_transitions: &HashMap<(usize, u8), (usize, u8, u8, bool)>,
+) {
     let mut position = find_start_position(&map);
     let mut current_direction: u8 = 0;
 
     for instruction in instructions {
         if let Some(steps) = instruction.walk {
-            walk(&mut position, steps, current_direction, &map);
+            walk(
+                &mut position,
+                steps,
+                &mut current_direction,
+                &map,
+                cube_sides,
+                cube_transitions,
+            );
         } else if let Some(turn_to) = instruction.turn {
             turn(&mut current_direction, turn_to);
         }
@@ -30,17 +152,27 @@ fn main() {
     )
 }
 
-fn walk(position: &mut (usize, usize), steps: u8, direction: u8, map: &Vec<Vec<char>>) {
+fn walk(
+    position: &mut (usize, usize),
+    steps: u8,
+    direction: &mut u8,
+    map: &Vec<Vec<char>>,
+    cube_sides: &[(usize, usize, usize, usize)],
+    cube_transitions: &HashMap<(usize, u8), (usize, u8, u8, bool)>,
+) {
     let mut steps_left = steps;
 
     while steps_left > 0 {
-        let next_position = get_next_position(&position, direction, map);
+        let (next_x, next_y, next_direction) =
+            get_next_position(&position, *direction, cube_sides, cube_transitions);
 
-        if map[next_position.1][next_position.0] == '#' {
+        if map[next_y][next_x] == '#' {
             return;
         }
 
-        *position = next_position;
+        *position = (next_x, next_y);
+
+        *direction = next_direction;
         steps_left -= 1;
     }
 }
@@ -48,66 +180,108 @@ fn walk(position: &mut (usize, usize), steps: u8, direction: u8, map: &Vec<Vec<c
 fn get_next_position(
     position: &(usize, usize),
     direction: u8,
-    map: &Vec<Vec<char>>,
-) -> (usize, usize) {
+    cube_sides: &[(usize, usize, usize, usize)],
+    cube_transitions: &HashMap<(usize, u8), (usize, u8, u8, bool)>,
+) -> (usize, usize, u8) {
     let mut x = position.0 as i16;
     let mut y = position.1 as i16;
+    let mut new_direction = direction;
+
+    let current_cube_side = get_cube_side(x, y, cube_sides);
 
     match direction {
-        0 => x = fix_x(x + 1, &map[position.1], direction) as i16,
-        1 => y = fix_y(position.0, y + 1, map, direction) as i16,
-        2 => x = fix_x(x - 1, &map[position.1], direction) as i16,
-        3 => y = fix_y(position.0, y - 1, map, direction) as i16,
+        0 => x += 1,
+        1 => y += 1,
+        2 => x += -1,
+        3 => y += -1,
         _ => panic!("invalid direction"),
     };
 
-    return (x as usize, y as usize);
+    let new_cube_side = get_cube_side(x, y, cube_sides);
+
+    if current_cube_side != new_cube_side {
+        do_transition(
+            current_cube_side.unwrap(),
+            &mut x,
+            &mut y,
+            &mut new_direction,
+            cube_sides,
+            cube_transitions,
+        );
+    }
+
+    return (x as usize, y as usize, new_direction);
 }
 
-fn fix_x(x: i16, row: &Vec<char>, direction: u8) -> usize {
-    return if x < 0 || (direction == 2 && row[x as usize] == ' ') {
-        let mut outer_right = row.len() - 1;
+fn do_transition(
+    cube_side: usize,
+    x: &mut i16,
+    y: &mut i16,
+    direction: &mut u8,
+    cube_sides: &[(usize, usize, usize, usize)],
+    cube_transitions: &HashMap<(usize, u8), (usize, u8, u8, bool)>,
+) {
+    let (new_cube_side, new_direction, map_coordinate_to_side, flip) = cube_transitions
+        .get(&(cube_side, *direction))
+        .expect("transition fetched");
 
-        while row[outer_right] == ' ' {
-            outer_right -= 1;
-        }
-
-        outer_right
-    } else if x as usize >= row.len() || (direction == 0 && row[x as usize] == ' ') {
-        let mut outer_left = 0;
-
-        while row[outer_left] == ' ' {
-            outer_left += 1;
-        }
-
-        outer_left
-    } else {
-        x as usize
+    let source_offset = match direction {
+        1 | 3 => *x - cube_sides[cube_side].0 as i16,
+        0 | 2 => *y - cube_sides[cube_side].2 as i16,
+        _ => panic!(),
     };
+
+    match map_coordinate_to_side {
+        0 => {
+            *x = cube_sides[*new_cube_side].1 as i16;
+            *y = if *flip {
+                cube_sides[*new_cube_side].3 as i16 - source_offset
+            } else {
+                cube_sides[*new_cube_side].2 as i16 + source_offset
+            }
+        }
+        1 => {
+            *x = if *flip {
+                cube_sides[*new_cube_side].1 as i16 - source_offset
+            } else {
+                cube_sides[*new_cube_side].0 as i16 + source_offset
+            };
+            *y = cube_sides[*new_cube_side].3 as i16
+        }
+        2 => {
+            *x = cube_sides[*new_cube_side].0 as i16;
+            *y = if *flip {
+                cube_sides[*new_cube_side].3 as i16 - source_offset
+            } else {
+                cube_sides[*new_cube_side].2 as i16 + source_offset
+            }
+        }
+        3 => {
+            *x = if *flip {
+                cube_sides[*new_cube_side].1 as i16 - source_offset
+            } else {
+                cube_sides[*new_cube_side].0 as i16 + source_offset
+            };
+            *y = cube_sides[*new_cube_side].2 as i16;
+        }
+        _ => panic!(),
+    }
+
+    *direction = *new_direction;
 }
 
-fn fix_y(x: usize, y: i16, map: &Vec<Vec<char>>, direction: u8) -> usize {
-    return if y < 0 || (direction == 3 && map[y as usize][x] == ' ') {
-        let mut outer_bottom = map.len() - 1;
-
-        while map[outer_bottom].len() < x || map[outer_bottom][x] == ' ' {
-            outer_bottom -= 1;
+fn get_cube_side(x: i16, y: i16, cube_sides: &[(usize, usize, usize, usize)]) -> Option<usize> {
+    for i in 0..cube_sides.len() {
+        if x >= cube_sides[i].0 as i16
+            && x <= cube_sides[i].1 as i16
+            && y >= cube_sides[i].2 as i16
+            && y <= cube_sides[i].3 as i16
+        {
+            return Some(i);
         }
+    }
 
-        outer_bottom
-    } else if y as usize >= map.len()
-        || (direction == 1 && (x > map[y as usize].len() || map[y as usize][x] == ' '))
-    {
-        let mut outer_top = 0;
-
-        while map[outer_top][x] == ' ' {
-            outer_top += 1;
-        }
-
-        outer_top
-    } else {
-        y as usize
-    };
+    return None;
 }
 
 fn turn(direction: &mut u8, turn: char) {
